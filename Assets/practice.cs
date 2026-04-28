@@ -4,23 +4,23 @@ public class practice : MonoBehaviour
 {
     public enum Axis { X, Y, Z }
 
-    [Header("移动设置")]
+    [Header("movementSettings")]
     public Axis axis = Axis.X;
-    public float speed = 1f;       // 单位：单位/秒
-    public float maxDistance = 2f; // 相对于起始位置的最大距离
+    public float speed = 1f;       // units per second
+    public float maxDistance = 2f; // max distance from start position along the chosen axis before reversing direction
 
     Vector3 _startLocalPos;
-    int _direction = 1; // 1 表示正方向，-1 表示负方向
+    int _direction = 1; 
 
     void Start()
     {
-        // 统一使用 localPosition 作为参考（避免父对象变换影响）
+        // use local position to allow movement relative to parent
         _startLocalPos = transform.localPosition;
     }
 
     void Update()
     {
-        // 每帧移动量（帧率无关）
+        // rate-based movement
         float moveAmount = _direction * speed * Time.deltaTime;
         Vector3 delta = Vector3.zero;
 
@@ -33,31 +33,31 @@ public class practice : MonoBehaviour
 
         transform.localPosition += delta;
 
-        // 计算相对于起始位置的偏移量并判断是否超过阈值
+        // calculate signed distance from start position along the chosen axis
         Vector3 offset = transform.localPosition - _startLocalPos;
         float signed = (axis == Axis.X) ? offset.x : (axis == Axis.Y ? offset.y : offset.z);
 
         if (signed > maxDistance)
         {
-            // 夹紧到正阈值并反向
+            // reverse direction and clamp to positive threshold
             Vector3 clamped = _startLocalPos;
             if (axis == Axis.X) clamped.x += maxDistance;
             else if (axis == Axis.Y) clamped.y += maxDistance;
             else clamped.z += maxDistance;
 
             transform.localPosition = clamped;
-            _direction = -1;
+            _direction = -5;
         }
         else if (signed < -maxDistance)
         {
-            // 夹紧到负阈值并反向
+            // reverse direction and clamp to negative threshold
             Vector3 clamped = _startLocalPos;
             if (axis == Axis.X) clamped.x -= maxDistance;
             else if (axis == Axis.Y) clamped.y -= maxDistance;
             else clamped.z -= maxDistance;
 
             transform.localPosition = clamped;
-            _direction = 1;
+            _direction = 5;
         }
     }
 }
